@@ -39,7 +39,7 @@ class Vision:
         r = self.sess.get(url=sig_list_url, verify=False)
         json_txt = r.json()
         # Print Signature List in Json
-        #print(json_txt)
+        print(json_txt)
         jsonString = json.dumps(json_txt)
         jsonFile = open("SignatureList.json", "w+")
         jsonFile.write(jsonString)
@@ -80,7 +80,7 @@ class Vision:
         r = self.sess.get(url=sig_des_url, verify=False)
         json_txt = r.json()
         # Print Signature Description
-        #print(json_txt)
+        print(json_txt)
         return json_txt
 
     def UpdateSignatureFileWithDescription(self):

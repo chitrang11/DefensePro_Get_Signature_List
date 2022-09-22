@@ -2,6 +2,7 @@
 The script's purpose is to provide a list of signatures with a description of the signature that DefensePro's profile is using (SignatureList.csv and SignatureList.json).
 The script interacts with Radware APSolute Vision and DefensePro (via APSolute Vision) and collects all the necessary data through REST API calls.
 
+
 ## IMPORTANT
 ● Read the entire file before attempting to configure or execute it.
 
@@ -39,3 +40,8 @@ urllib3
 
 6. Navigate to the folder containing the script and run it.
 python3 main.py
+
+
+## Version log
+1.0 Original Scrit (09/21/2022)
+1.1 Print Output on Console (09/22/2022)
