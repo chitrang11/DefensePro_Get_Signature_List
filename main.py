@@ -4,6 +4,8 @@ import requests
 import json
 import csv
 import os
+import datetime
+import glob
 
 
 class Vision:
@@ -39,9 +41,9 @@ class Vision:
         r = self.sess.get(url=sig_list_url, verify=False)
         json_txt = r.json()
         # Print Signature List in Json
-        print(json_txt)
+        # print(json_txt)
         jsonString = json.dumps(json_txt)
-        jsonFile = open("SignatureList.json", "w+")
+        jsonFile = open(JsonFile, "w+")
         jsonFile.write(jsonString)
         jsonFile.close()
         return json_txt
@@ -49,13 +51,13 @@ class Vision:
     def CovertJsonFileToCsv(self):
         # Opening JSON file and loading the data
         # into the variable data
-        with open('SignatureList.json') as json_file:
+        with open(JsonFile) as json_file:
             data = json.load(json_file)
 
         SigProAttackList_data = data['rsIDSSignaturesProfileAttackListTable']
 
         # open a CSV file for writing
-        data_file = open('SignatureList.csv', 'w+')
+        data_file = open(CsvFile, 'w+')
 
         # create the csv writer object
         csv_writer = csv.writer(data_file)
@@ -80,11 +82,11 @@ class Vision:
         r = self.sess.get(url=sig_des_url, verify=False)
         json_txt = r.json()
         # Print Signature Description
-        print(json_txt)
+        # print(json_txt)
         return json_txt
 
     def UpdateSignatureFileWithDescription(self):
-        with open('SignatureList.json') as json_file:
+        with open(JsonFile) as json_file:
             data = json.load(json_file)
             for i in data["rsIDSSignaturesProfileAttackListTable"]:
                 # print(i["rsIDSSignaturesProfileAttackListAttackID"])
@@ -94,20 +96,42 @@ class Vision:
                 #print (SigDescription)
                 i.update(SigDescription)
         json_file.close()
-        with open('SignatureList.json', 'w') as outfile:
+        with open(JsonFile, 'w') as outfile:
             json.dump(data, outfile)
         v.CovertJsonFileToCsv()
 
-    def CleanCSVFile(self):
-        with open('SignatureList.csv') as filehandle:
+    def CleanFile(self):
+        with open(CsvFile) as filehandle:
             lines = filehandle.readlines()
-        with open('SignatureList.csv', 'w') as filehandle:
+        with open(CsvFile, 'w') as filehandle:
             lines = filter(lambda x: x.strip(), lines)
             filehandle.writelines(lines)
+        
+        # Get current time
+        CurrentTime = datetime.datetime.now().timestamp()
+        # print(CurrentTime)
+        BackTime = CurrentTime - (cfg.FileRetention * 86400)      # 86400=24*60*60
+        # print(BackTime)
 
+        pattern = cfg.DefensePro_MGMT_IP + '_' + cfg.Signature_Profile_Name + '_*'
+        files = glob.glob(pattern)
+
+        for file in files:
+            File_Last_Modified_time = os.path.getmtime(file)
+            if File_Last_Modified_time < BackTime:
+                os.remove(file)
+                print(file + ' is old file and deleted')
+        print(CsvFile + ' and ' + JsonFile + ' is created')
+
+
+now = datetime.datetime.now()
+Date_time = now.strftime("%Y-%m-%d_%H-%M-%S")
+FileName = cfg.DefensePro_MGMT_IP + '_' + cfg.Signature_Profile_Name + '_' + Date_time
+JsonFile = FileName+'.json'
+CsvFile = FileName+'.csv'
 
 v = Vision(cfg.VISION_IP, cfg.VISION_USER, cfg.VISION_PASS)
 v.FetchSignatureList()
 v.CovertJsonFileToCsv()
 v.UpdateSignatureFileWithDescription()
-v.CleanCSVFile()
+v.CleanFile()

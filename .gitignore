@@ -127,6 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-SignatureList.json
-SignatureList.csv
 config.py
+10.105.192.33_MSSP_*
